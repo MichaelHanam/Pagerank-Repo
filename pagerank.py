@@ -57,8 +57,19 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
 
+    neighbor_pages = corpus[page]
+
+    if len(neighbor_pages) == 0:
+        final_dict = {final_page: 1/len(corpus) for final_page in corpus}
+
+    else:
+        general_page_factor = (1-damping_factor)/(len(corpus))
+        neighbor_page_factor = (damping_factor/(len(neighbor_pages))) 
+
+        final_dict = {final_page: general_page_factor + (neighbor_page_factor if final_page in neighbor_pages else 0) for final_page in corpus}
+    
+    return final_dict
 
 def sample_pagerank(corpus, damping_factor, n):
     """
@@ -69,8 +80,29 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
 
+    page = random.choice(list(corpus.keys()))
+    final_dict = {corpus_page: 0 for corpus_page in corpus.keys()}
+
+    for sample in range(n):
+
+        random_percent = random.random()
+        percentages = transition_model(corpus, page, damping_factor)
+
+        values = []
+
+        for key in percentages.keys():
+            
+            values.append(percentages[key])
+
+            if random_percent <= sum(values):
+
+                page = key
+                break
+
+        final_dict[page] += 1/n
+
+    return final_dict
 
 def iterate_pagerank(corpus, damping_factor):
     """
@@ -81,7 +113,28 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    final_dict = {final_page: 1/len(corpus) for final_page in corpus}
+    
+    change_check = 1
+
+    while change_check > 0.001:
+
+        change_check = 0
+
+        for main_page in corpus:
+            value = 0
+            for page in corpus:
+
+                if main_page in corpus[page]:
+
+                    value += final_dict[page]/len(corpus[page])
+            
+            final_dict[main_page] = ((1-damping_factor)/len(corpus))+value
+
+            change_check += ((1-damping_factor)/len(corpus))+value
+        
+            
+    return final_dict
 
 
 if __name__ == "__main__":
