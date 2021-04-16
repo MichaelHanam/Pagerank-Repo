@@ -119,7 +119,7 @@ def iterate_pagerank(corpus, damping_factor):
 
     while change_check > 0.001:
 
-        change_check = 0
+        change_check = sum(final_dict.values())
 
         for main_page in corpus:
             value = 0
@@ -129,11 +129,10 @@ def iterate_pagerank(corpus, damping_factor):
 
                     value += final_dict[page]/len(corpus[page])
             
-            final_dict[main_page] = ((1-damping_factor)/len(corpus))+value
+            final_dict[main_page] = ((1-damping_factor)/len(corpus))+(value*damping_factor)
 
-            change_check += ((1-damping_factor)/len(corpus))+value
+        change_check = abs(change_check-sum(final_dict.values()))
         
-            
     return final_dict
 
 
