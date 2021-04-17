@@ -2,6 +2,7 @@ import os
 import random
 import re
 import sys
+import copy
 
 DAMPING = 0.85
 SAMPLES = 10000
@@ -101,7 +102,6 @@ def sample_pagerank(corpus, damping_factor, n):
                 break
 
         final_dict[page] += 1/n
-
     return final_dict
 
 def iterate_pagerank(corpus, damping_factor):
@@ -114,12 +114,19 @@ def iterate_pagerank(corpus, damping_factor):
     PageRank values should sum to 1.
     """
     final_dict = {final_page: 1/len(corpus) for final_page in corpus}
+
+    for page in corpus:
+        if corpus[page] == set():
+
+            corpus[page] = set(corpus.keys())
     
-    change_check = 1
+    change = True
 
-    while change_check > 0.001:
+    while change:
 
-        change_check = sum(final_dict.values())
+        change = False
+
+        temp_final_dict = copy.deepcopy(final_dict)
 
         for main_page in corpus:
             value = 0
@@ -129,10 +136,14 @@ def iterate_pagerank(corpus, damping_factor):
 
                     value += final_dict[page]/len(corpus[page])
             
-            final_dict[main_page] = ((1-damping_factor)/len(corpus))+(value*damping_factor)
+            temp_final_dict[main_page] = ((1-damping_factor)/len(corpus))+(value*damping_factor)
 
-        change_check = abs(change_check-sum(final_dict.values()))
+        for page in final_dict:
+            if abs(temp_final_dict[page] - final_dict[page]) > 0.001:
+
+                change = True
         
+        final_dict = temp_final_dict
     return final_dict
 
 
